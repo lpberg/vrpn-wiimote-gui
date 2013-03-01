@@ -13,6 +13,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_VERSION
 	"${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 
+option(BUILD_WITH_CONSOLE "Should we display stuff to a console window?" OFF)
 
 ###
 # Perform build configuration of dependencies
@@ -40,7 +41,7 @@ include(${QT_USE_FILE})
 # Build the project
 ###
 
-set(EXTRA_LIBS ${QT_LIBRARIES} ${VRPN_SERVER_LIBRARY})
+set(EXTRA_LIBS ${QT_QTSVG_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY} ${VRPN_SERVER_LIBRARY})
 include_directories(${VRPN_INCLUDE_DIRS})
 add_definitions(${VRPN_DEFINITIONS})
 set(VRPN_FOUND TRUE)
@@ -78,10 +79,15 @@ source_group("Generated Sources - Do Not Edit" FILES ${GENERATED_SOURCES})
 # Make sure the compiler can find the pre-processed files from qt4_wrap_ui
 include_directories(${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
+set(EXECUTABLE_FLAGS)
+if(BUILD_WITH_CONSOLE)
+	list(APPEND EXTRA_LIBS ${QT_QTMAIN_LIBRARY})
+	set(EXECUTABLE_FLAGS MACOSX_BUNDLE WIN32)
+endif()
+
 # Build and link the app!
 add_executable(wiimote-wand-gui
-	MACOSX_BUNDLE
-	WIN32
+	${EXECUTABLE_FLAGS}
 	${SOURCES}
 	${GENERATED_SOURCES}
 	${HEADERS}
